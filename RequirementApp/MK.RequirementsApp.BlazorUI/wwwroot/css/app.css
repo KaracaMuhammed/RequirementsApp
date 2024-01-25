@@ -162,3 +162,14 @@ a, .btn-link {
         max-width: calc(100% - 45px); /* Adjust the value based on your design */
     }
 }
+
+.spinner-container {
+    height: 100%; /* Ensure the container takes the full height of the parent */
+}
+
+.d-flex.align-items-center.justify-content-center {
+    /* Center the child horizontally and vertically */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

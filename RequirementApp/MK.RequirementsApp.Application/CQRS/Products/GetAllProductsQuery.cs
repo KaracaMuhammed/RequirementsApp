@@ -22,6 +22,13 @@ namespace MK.RequirementsApp.Application.CQRS.Products
         public async Task<IEnumerable<Product>> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
         {
             IEnumerable<Product> products = await uow.ProductsRepository.GetAll();
+
+            //foreach (Product product in products)
+            //{
+            //    var image = await uow.ImagesRepository.GetByProductId(product.Id);
+            //    product.Image = Convert.ToBase64String(image.ProductImage);
+            //}
+
             return products;
         }
     }

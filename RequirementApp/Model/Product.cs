@@ -9,7 +9,7 @@ namespace MK.RequirementsApp.Domain
         public Importance Importance { get; set; }
         public Status Status { get; set; }
         public List<Company> Companies { get; set; }
-        public string? Image { get; set; }
+        [JsonIgnore] public string? Image { get; set; }
 
     }
 
