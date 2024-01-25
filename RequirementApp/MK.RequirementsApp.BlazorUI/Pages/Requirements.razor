@@ -191,17 +191,21 @@
         // products = await ProductService.GetAllProducts();
         // allProducts = products;
 
-        var productStatus = products.FirstOrDefault(p => p.Id == productId).Status;
-        if (productStatus == Status.NotPurchased)
-            productStatus = Status.InProgress;
-        else if (productStatus == Status.InProgress)
-            productStatus = Status.Purchased;
-        else productStatus = Status.NotPurchased;
+        // if (selectedCompanyId != -1)
+        //     products = (await ProductService.GetAllProducts()).Where(p => p.Companies.Any(c => c.Id == selectedCompanyId)).ToList();
 
-        
+        var productToUpdate = products.FirstOrDefault(p => p.Id == productId);
+        if (productToUpdate != null)
+        {
+            if (productToUpdate.Status == Status.NotPurchased)
+                productToUpdate.Status = Status.InProgress;
+            else if (productToUpdate.Status == Status.InProgress)
+                productToUpdate.Status = Status.Purchased;
+            else productToUpdate.Status = Status.NotPurchased;
 
-        if (selectedCompanyId != -1)
-            products = (await ProductService.GetAllProducts()).Where(p => p.Companies.Any(c => c.Id == selectedCompanyId)).ToList();
+            StateHasChanged();
+        }
+
     }
 
     private async void FilterProducts(int companyId, bool force = false)
@@ -221,7 +225,6 @@
     public async Task ToggleVisibility(bool hideImageSection)
     {
         await JSRuntime.InvokeVoidAsync("toggleVisibility", hideImageSection);
-        await FetchImages();
     }
 
     private void NavigatePurchased()
