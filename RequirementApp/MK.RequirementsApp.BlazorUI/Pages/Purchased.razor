@@ -1,0 +1,174 @@
+﻿@page "/purchased"
+
+@using System.Text.Json;
+@using MK.RequirementsApp.BlazorUI.Interfaces;
+@using MK.RequirementsApp.Domain;
+
+@inject ICompanyService CompanyService;
+@inject IProductService ProductService;
+
+@* disable zoom in & out *@
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<link rel="stylesheet" href="https://unpkg.com/simplebar@5.3.0/dist/simplebar.min.css" integrity="..." crossorigin="anonymous">
+<script src="https://unpkg.com/simplebar@5.3.0/dist/simplebar.min.js" integrity="..." crossorigin="anonymous"></script>
+
+@* companies list *@
+<div class="container mb-2">
+    @if (companies != null)
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="simplebar" style="padding: 5px;" data-simplebar>
+                    <div class="d-flex margin-bottom: 15px;">
+
+                        @foreach (var item in companies)
+                        {
+                            <div class="card" id="company-button-@item.Id" style="min-width: 200px; margin-right: 10px; margin-bottom: 5px;" @onclick="() => FilterProducts(item.Id)">
+                                <div class="card-body">
+                                    <h6 class="card-title" style="font-weight: bold;">@item.Name</h6>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>Loading companies...</p>
+    }
+</div>
+
+
+<div class="products">
+    
+    @if (products != null)
+    {
+        @foreach (var product in products.Where(p => p.Status == Status.Purchased))
+        {
+            <div class="card mb-2" style="max-width: 100%; height: 8rem; display: flex; flex-direction: row;">
+                <div style="flex: 0 0 8rem; display: none;">
+                    @*<img src="https://picsum.photos/@product.Id" class="card-img" alt="..." style="height: 100%;">*@
+                    <span style="position: absolute; bottom: 0; left: 5px; color: gold; font-size: 18px;">&#9733;</span>
+                    <span style="position: absolute; bottom: 0; left: 17px; color: gold; font-size: 18px;">&#9733;</span>
+                    <span style="position: absolute; bottom: 0; left: 28px; color: grey; font-size: 18px;">&#9733;</span>
+                </div>
+                <div style="flex: 1;">
+                    <div class="card-body">
+                        <div>
+                            <h6 class="card-title" style="font-weight: bold; display: inline;">@product.Name</h6>
+                            <p class="card-text" style="display: block;">
+                                @foreach (var company in product.Companies)
+                                {
+                                    <span class="badge badge-secondary" style="border: 1px solid lightgrey; color: #3d3d3d; margin-left: 2px;">@company.Name</span>
+                                }
+                            </p>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+
+                            <button type="button" class="btn btn-danger mt-2" style="width: 20%;" @onclick="() => DeleteProduct(product.Id)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"></path>
+                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"></path>
+                                </svg>
+                            </button>
+
+                            <button type="button" class="btn btn-outline-success pbutton mt-2 ms-2" @onclick="() => UpdateProductStatus(product.Id)">
+                                Yeniden Ekle
+                            </button>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p>No products...</p>
+    }
+</div>
+
+<a class="btn btn-primary circular-btn" style="bottom: 75px;" @onclick="NavigateCreate">
+    <i class="fas fa-plus"></i>
+</a>
+
+<a class="btn btn-primary circular-btn" @onclick="NavigateRequirements">
+    <i class="fas fa-shopping-cart"></i>
+</a>
+
+@code {
+
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject] private HttpClient HttpClient { get; set; }
+
+    private List<Product> allProducts { get; set; }
+
+    private List<Product> products { get; set; }
+    private List<Company> companies { get; set; }
+
+    
+
+    private int selectedCompanyId = -1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await ProductService.GetAllProducts();
+        allProducts = products;
+        companies = await CompanyService.GetAllCompanies();
+    }
+
+    private async Task UpdateProductStatus(int productId)
+    {
+        await ProductService.UpdateProductStatus(productId);
+        products = await ProductService.GetAllProducts();
+        allProducts = products;
+
+        if (selectedCompanyId != -1)
+        {
+            var syncProducts = await ProductService.GetAllProducts();
+            products = syncProducts.Where(p => p.Companies.Any(c => c.Id == selectedCompanyId)).ToList();
+        }
+    }
+
+    private async Task DeleteProduct(int productId)
+    {
+        await ProductService.DeleteProduct(productId);
+        products = await ProductService.GetAllProducts();
+        allProducts = products;
+
+        if (selectedCompanyId != -1)
+        {
+            var syncProducts = await ProductService.GetAllProducts();
+            products = syncProducts.Where(p => p.Companies.Any(c => c.Id == selectedCompanyId)).ToList();
+        }
+    }
+
+    private async void FilterProducts(int companyId)
+    {
+        if (selectedCompanyId == companyId)
+        {
+            products = allProducts;
+            selectedCompanyId = -1;
+        }
+        else
+        {
+            products = allProducts.Where(p => p.Companies.Any(c => c.Id == companyId)).ToList();
+            selectedCompanyId = companyId;
+        }
+    }
+
+    private void NavigateCreate()
+    {
+        NavigationManager.NavigateTo("/create");
+    }
+
+    private void NavigateRequirements()
+    {
+        NavigationManager.NavigateTo("/requirements");
+    }
+}

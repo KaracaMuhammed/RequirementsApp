@@ -1,0 +1,223 @@
+﻿@page "/requirements"
+
+@using System.Text.Json;
+@using MK.RequirementsApp.BlazorUI.Interfaces;
+@using MK.RequirementsApp.BlazorUI.Services;
+@using MK.RequirementsApp.Domain;
+
+@inject IProductService ProductService;
+@inject ICompanyService CompanyService;
+
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+
+@* disable zoom in & out *@
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+@* online fonts *@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="..." crossorigin="anonymous">
+
+
+@* horizontal scroll view *@
+<link rel="stylesheet" href="https://unpkg.com/simplebar@5.3.0/dist/simplebar.min.css" integrity="..." crossorigin="anonymous">
+<script src="https://unpkg.com/simplebar@5.3.0/dist/simplebar.min.js" integrity="..." crossorigin="anonymous"></script>
+
+@* companies list *@
+<div class="container mb-2">
+    @if (companies != null)
+    {
+    <div class="row">
+        <div class="col-12">
+            <div class="simplebar" style="padding: 5px;" data-simplebar>
+                <div class="d-flex margin-bottom: 15px;">
+                    
+                        @foreach (var item in companies)
+                        {
+                            <div class="card" id="company-button-@item.Id" style="min-width: 200px; margin-right: 10px; margin-bottom: 5px;" @onclick="() => FilterProducts(item.Id)">
+                                <div class="card-body">
+                                    <h6 class="card-title" style="font-weight: bold;">@item.Name</h6>
+                                </div>
+                            </div>
+                        }
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+    else
+    {
+        <p>Loading companies...</p>
+    }
+</div>
+
+
+@* products list *@
+<div class="product-container">
+    @if (products != null)
+    {
+        @foreach (var product in products.Where(p => p.Status != Status.Purchased))
+        {
+            <div class="product-card card mb-2" style="max-width: 100%; height: 8rem; display: flex; flex-direction: row;">
+                <div style="flex: 0 0 8rem; display: none;" class="image-section">
+                    @* <img src="https://picsum.photos/@product.Id" class="card-img" alt="Product Image" style="height: 100%;"> *@
+                    @* <img src="data:image/png;base64,@product.Base64Image" class="card-img" alt="Product Image" style="height: 100%;" /> *@
+                    @*<span style="position: absolute; bottom: 0; left: 5px; color: gold; font-size: 18px;">&#9733;</span>
+                    <span style="position: absolute; bottom: 0; left: 17px; color: gold; font-size: 18px;">&#9733;</span>
+                    <span style="position: absolute; bottom: 0; left: 28px; color: grey; font-size: 18px;">&#9733;</span>*@
+                </div>
+                <div style="flex: 1;">
+                    <div class="card-body">
+                        <div style="overflow-x: auto;">
+                            <span>
+                                <h6 class="card-title" style="font-weight: bold; display: inline;">@product.Name</h6>
+                                <p class="card-text" style="display: block; white-space: nowrap;">
+                                    @foreach (var company in product.Companies)
+                                    {
+                                        <span class="badge companies" data-companyid="@company.Id" style="border: 1px solid lightgrey; color: #3d3d3d; margin-left: 2px;">@company.Name</span>
+                                    }
+                                </p>
+                            </span>
+                        </div>
+
+                        @if (product.Status == Status.NotPurchased)
+                        {
+                            <button type="button" class="btn pbutton pbuttonc mt-2" @onclick="() => UpdateProductStatus(product.Id)">
+                                Sepete Ekle
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+                                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"></path>
+                                </svg>
+                            </button>
+                        }
+
+                        @if (product.Status == Status.InProgress)
+                        {
+                            <button type="button" class="btn pbutton mt-2 btn-outline-danger" @onclick="() => UpdateProductStatus(product.Id)">
+                                Kaldır
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"></path>
+                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"></path>
+                                </svg>
+                            </button>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p>Loading products...</p>
+    }
+</div>
+
+
+
+@* <button type="button" id="hide-button" class="circular-button fixed-button" onclick="toggleVisibility(false)" style="display: none;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16" style="margin-bottom: 8px; color: black; margin-right: 4px;">
+        <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"></path>
+        <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"></path>
+        <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"></path>
+    </svg>
+</button>
+
+<button type="button" id="display-button" class="circular-button fixed-button hidden" onclick="toggleVisibility(true)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16" style="margin-bottom: 9px; color: black; margin-right: 4px;">
+        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z" />
+        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0" />
+    </svg>
+</button> *@
+
+
+
+<a id="hide-button" style="bottom: 75px;" class="btn btn-primary circular-btn hidden" onclick="toggleVisibility(false)">
+    <i class="fas fa-eye-slash"></i>
+</a>
+
+<a id="display-button" style="bottom: 75px;" class="btn btn-primary circular-btn" onclick="toggleVisibility(true)">
+    <i class="fas fa-eye" ></i>
+</a>
+
+<a class="btn btn-primary circular-btn" @onclick="Navigate">
+    @* <i class="fas fa-trash"></i> *@
+    <i class="fas fa-store"></i>
+</a>
+
+<script>
+
+    function toggleVisibility(hideImageSection) {
+
+        var imageSections = document.querySelectorAll('.image-section');
+        var hideButton = document.getElementById('hide-button');
+        var displayButton = document.getElementById('display-button');
+        var companies = document.getElementsByClassName('companies');
+
+        selectedCompanyId = hideImageSection ? -1 : selectedCompanyId;
+
+        imageSections.forEach(function (imageSection) {
+            imageSection.style.display = hideImageSection ? 'block' : 'none';
+        });
+
+        hideButton.classList.toggle('hidden', !hideImageSection);
+        displayButton.classList.toggle('hidden', hideImageSection);
+
+        // companies.forEach(function (company) {
+        //     company.classList.toggle('hidden', hideImageSection);
+        // });
+    }
+
+</script>
+
+
+
+@code {
+
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    private List<Product> allProducts { get; set; } // keeping products in cache
+    private List<Product> products { get; set; }
+    private List<Company> companies { get; set; }
+
+    private int selectedCompanyId = -1; // filtering parameter
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await ProductService.GetAllProducts();
+        allProducts = products;
+        companies = await CompanyService.GetAllCompanies();
+    }
+
+    private async Task UpdateProductStatus(int productId)
+    {
+        await ProductService.UpdateProductStatus(productId);
+
+        // Use await to get the result asynchronously
+        // var selectedCompany = await JSRuntime.InvokeAsync<int>("getSelectedCompanyId");
+        // JSRuntime.InvokeVoidAsync("alert", selectedCompany.ToString());
+
+        products = await ProductService.GetAllProducts();
+        allProducts = products;
+
+        if (selectedCompanyId != -1)
+            products = (await ProductService.GetAllProducts()).Where(p => p.Companies.Any(c => c.Id == selectedCompanyId)).ToList();
+    }
+
+    private async void FilterProducts(int companyId, bool force = false)
+    {
+        if (selectedCompanyId == companyId)
+        {
+            products = allProducts;
+            selectedCompanyId = -1;
+        }
+        else
+        {
+            products = allProducts.Where(p => p.Companies.Any(c => c.Id == companyId)).ToList();
+            selectedCompanyId = companyId;
+        } 
+    }
+
+    private void Navigate()
+    {
+        NavigationManager.NavigateTo("/purchased");
+    }
+
+}
