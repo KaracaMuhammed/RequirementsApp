@@ -25,9 +25,10 @@ namespace MK.RequirementsApp.Application.CQRS.Products
         public async Task<Product> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
         {
             Product product = await uow.ProductsRepository.GetById(request.ProductId);
+            if (product != null) await uow.ProductsRepository.Delete(request.ProductId);
 
-            if (product != null)
-                await uow.ProductsRepository.Delete(request.ProductId);
+            Image image = await uow.ImagesRepository.GetByProductId(request.ProductId);
+            if (image != null) await uow.ImagesRepository.Delete(image.Id);
 
             await uow.Commit();
             return product;

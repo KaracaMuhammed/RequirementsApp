@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace MK.RequirementsApp.Application.CQRS.Companies
 {
-    public class GetAllImagesQuery : IRequest<IEnumerable<Image>> { }
+    public class GetAllImagesQuery : IRequest<IEnumerable<ImageDTO>> { }
 
-    public class GetAllImagesQueryHandler : IRequestHandler<GetAllImagesQuery, IEnumerable<Image>>
+    public class GetAllImagesQueryHandler : IRequestHandler<GetAllImagesQuery, IEnumerable<ImageDTO>>
     {
         private readonly IUnitofWork uow;
         public GetAllImagesQueryHandler(IUnitofWork uow)
@@ -19,9 +19,19 @@ namespace MK.RequirementsApp.Application.CQRS.Companies
             this.uow = uow;
         }
 
-        public async Task<IEnumerable<Image>> Handle(GetAllImagesQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ImageDTO>> Handle(GetAllImagesQuery request, CancellationToken cancellationToken)
         {
-            return await uow.ImagesRepository.GetAll();
+            var allImages = new List<ImageDTO>();
+            foreach (var image in await uow.ImagesRepository.GetAll())
+            {
+                allImages.Add(new ImageDTO
+                {
+                    Id = image.Id,
+                    ProductImage = Convert.ToBase64String(image.ProductImage),
+                    ProductId = image.ProductId
+                });
+            }
+            return allImages;
         }
     }
 }

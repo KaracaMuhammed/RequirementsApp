@@ -123,6 +123,9 @@ namespace MK.RequirementsApp.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Importance")
                         .HasColumnType("int");
 

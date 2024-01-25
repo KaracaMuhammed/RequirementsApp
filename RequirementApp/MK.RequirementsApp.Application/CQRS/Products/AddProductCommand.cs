@@ -33,6 +33,10 @@ namespace MK.RequirementsApp.Application.CQRS.Products
             };
 
             Product currentProduct = await uow.ProductsRepository.Create(product);
+            await uow.Commit();
+
+
+            Console.WriteLine(currentProduct.Id);
 
             Image image = new Image()
             {
@@ -40,10 +44,9 @@ namespace MK.RequirementsApp.Application.CQRS.Products
                 ProductImage = Convert.FromBase64String(productDTO.Image)
             };
 
-            uow.ProductsRepository.Create(product);
             uow.ImagesRepository.Create(image);
-
             await uow.Commit();
+
             return product;
         }
     }

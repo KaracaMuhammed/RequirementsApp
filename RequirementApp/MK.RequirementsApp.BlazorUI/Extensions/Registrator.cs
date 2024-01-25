@@ -10,6 +10,7 @@ namespace MK.RequirementsApp.BlazorUI.Extensions
         {
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICompanyService, CompanyService>();
+            services.AddScoped<IImageService, ImageService>();
             return services;
         }
     }

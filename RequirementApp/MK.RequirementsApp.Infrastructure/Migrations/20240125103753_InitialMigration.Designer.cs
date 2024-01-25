@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MK.RequirementsApp.Infrastructure.Migrations
 {
     [DbContext(typeof(RequirementsContext))]
-    [Migration("20240125092435_InitialMigration")]
+    [Migration("20240125103753_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -125,6 +125,9 @@ namespace MK.RequirementsApp.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Importance")
                         .HasColumnType("int");

@@ -26,8 +26,13 @@ namespace MK.RequirementsApp.Infrastructure.Repositories
 
         public async Task Delete(int imageId)
         {
-            var image = await context.Images.FirstOrDefaultAsync(p => p.Id == imageId);
+            var image = await context.Images.FirstOrDefaultAsync(i => i.Id == imageId);
             context.Images.Remove(image);
+        }
+
+        public async Task<Image> GetByProductId(int productId)
+        {
+            return await context.Images.FirstOrDefaultAsync(i => i.ProductId == productId);
         }
     }
 }
