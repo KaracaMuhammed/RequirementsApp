@@ -8,7 +8,7 @@ namespace MK.RequirementsApp.BlazorUI.Services
     {
 
         private HttpClient httpClient { get; set; }
-        private List<string> baseUrls = new List<string>() { "https://192.168.0.238:5001" /*, "https://localhost:5001", "https://192.168.0.241:5001"*/  };
+        private List<string> baseUrls = new List<string>() { "https://192.168.0.238:5001" /*"https://192.168.0.238:5001", "https://localhost:5001", "https://192.168.0.241:5001"*/ };
 
         public ImageService(HttpClient httpClient)
         {
@@ -24,6 +24,27 @@ namespace MK.RequirementsApp.BlazorUI.Services
                 try
                 {
                     var apiUrl = $"{baseUrl}/api/images";
+                    var response = await httpClient.GetStringAsync(apiUrl);
+                    images = JsonSerializer.Deserialize<List<ImageDTO>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    break;
+                }
+                catch (HttpRequestException innerEx)
+                {
+                    Console.WriteLine($"Error fetching products from {baseUrl}: {innerEx.Message}");
+                }
+            }
+
+            return images;
+        }
+
+        public async Task<List<ImageDTO>> GetActiveImages()
+        {
+            var images = new List<ImageDTO>();
+            foreach (var baseUrl in baseUrls)
+            {
+                try
+                {
+                    var apiUrl = $"{baseUrl}/api/images/active";
                     var response = await httpClient.GetStringAsync(apiUrl);
                     images = JsonSerializer.Deserialize<List<ImageDTO>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     break;

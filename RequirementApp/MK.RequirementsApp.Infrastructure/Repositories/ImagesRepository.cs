@@ -34,5 +34,10 @@ namespace MK.RequirementsApp.Infrastructure.Repositories
         {
             return await context.Images.FirstOrDefaultAsync(i => i.ProductId == productId);
         }
+
+        public async Task<IEnumerable<Image>> GetByProductIds(List<int> productIds)
+        {
+            return await context.Images.Where(i => productIds.Contains(i.ProductId)).ToListAsync();
+        }
     }
 }

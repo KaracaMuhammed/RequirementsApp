@@ -52,5 +52,10 @@ namespace MK.RequirementsApp.Infrastructure.Repositories
             var product = await context.Products.FirstOrDefaultAsync(p => p.Id == productId);
             context.Products.Remove(product);
         }
+
+        public async Task<IEnumerable<int>> GetActiveProductsIds() 
+        {
+            return context.Products.Where(p => p.Status == Status.NotPurchased || p.Status == Status.InProgress).Select(p => p.Id).ToList();
+        }
     }
 }

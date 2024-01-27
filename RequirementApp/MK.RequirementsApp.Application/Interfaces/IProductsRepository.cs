@@ -15,6 +15,7 @@ namespace MK.RequirementsApp.Application.Interfaces
         public Task<Product> UpdateStatus(Product modifiedProduct);
         public Task<Product> GetById(int productId);
         public Task Delete(int productId);
+        Task<IEnumerable<int>> GetActiveProductsIds();
 
     }
 }

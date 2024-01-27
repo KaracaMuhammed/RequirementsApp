@@ -13,5 +13,6 @@ namespace MK.RequirementsApp.Application.Interfaces
         Task<IEnumerable<Image>> GetAll();
         Task Delete(int imageId);
         Task<Image> GetByProductId(int productId);
+        Task<IEnumerable<Image>> GetByProductIds(List<int> productIds);
     }
 }

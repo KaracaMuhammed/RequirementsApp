@@ -123,11 +123,11 @@
     }
 </div>
 
-<a id="hide-button" style="bottom: 75px;" class="btn btn-primary circular-btn hidden" @onclick="() => ToggleVisibility(false)">
+<a id="hide-button" style="bottom: 75px;" class="btn btn-primary circular-btn hidden" onclick="toggleVisibility(false)">
     <i class="fas fa-eye-slash"></i>
 </a>
 
-<a id="display-button" style="bottom: 75px;" class="btn btn-primary circular-btn" @onclick="() => ToggleVisibility(true)">
+<a id="display-button" style="bottom: 75px;" class="btn btn-primary circular-btn" onclick="toggleVisibility(true)">
     <i class="fas fa-eye" ></i>
 </a>
 
@@ -158,41 +158,45 @@
 @code {
 
     [Inject] private NavigationManager NavigationManager { get; set; }
-    private List<Product> allProducts { get; set; } // keeping products in cache
+
+    private List<Product> allProducts { get; set; }
     private List<Product> products { get; set; }
     private List<Company> companies { get; set; }
     private List<ImageDTO> images { get; set; }
 
-    private bool imagesLoaded = false;
     private int selectedCompanyId = -1;
+
+    private bool dataLoaded = false;
+    private bool imagesLoaded = false;
+    
 
     protected override async Task OnInitializedAsync()
     {
         products = await ProductService.GetAllProducts();
         allProducts = products;
         companies = await CompanyService.GetAllCompanies();
+        dataLoaded = true;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnParametersSetAsync()
     {
-        if (firstRender && !imagesLoaded)
+        if (dataLoaded && !imagesLoaded)
         {
             await FetchImages();
             imagesLoaded = true;
-            StateHasChanged();
+        }
+    }
+
+    private async Task WaitForProducts()
+    {
+        while (products == null)
+        {
+            await Task.Delay(150);
         }
     }
 
     private async Task UpdateProductStatus(int productId)
     {
-
-        // forced updates through api
-        // await ProductService.UpdateProductStatus(productId);
-        // products = await ProductService.GetAllProducts();
-        // allProducts = products;
-
-        // if (selectedCompanyId != -1)
-        //     products = (await ProductService.GetAllProducts()).Where(p => p.Companies.Any(c => c.Id == selectedCompanyId)).ToList();
 
         var productToUpdate = products.FirstOrDefault(p => p.Id == productId);
         if (productToUpdate != null)
@@ -203,8 +207,9 @@
                 productToUpdate.Status = Status.Purchased;
             else productToUpdate.Status = Status.NotPurchased;
 
-            StateHasChanged();
         }
+        await ProductService.UpdateProductStatus(productId);
+
 
     }
 
@@ -222,11 +227,6 @@
         } 
     }
 
-    public async Task ToggleVisibility(bool hideImageSection)
-    {
-        await JSRuntime.InvokeVoidAsync("toggleVisibility", hideImageSection);
-    }
-
     private void NavigatePurchased()
     {
         NavigationManager.NavigateTo("/purchased");
@@ -234,11 +234,14 @@
 
     public async Task FetchImages()
     {
-        images = await ImageService.GetAllImages();
-
-        foreach (var product in products)
+        if (products != null)
         {
-            product.Image = images.FirstOrDefault(i => i.ProductId == product.Id).ProductImage;
+            images = await ImageService.GetActiveImages();
+
+            foreach (var product in products)
+            {
+                product.Image = images.FirstOrDefault(i => i.ProductId == product.Id)?.ProductImage;
+            }
         }
     }
 
