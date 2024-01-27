@@ -1,24 +1,28 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MK.RequirementsApp.Application.Interfaces;
 using MK.RequirementsApp.Infrastructure.Contexts;
 using MK.RequirementsApp.Infrastructure.Repositories;
 using MK.RequirementsApp.Infrastructure.UoW;
+using System.Diagnostics;
 
 namespace MK.RequirementsApp.Infrastructure.Extensions
 {
     public static class Registrator
     {
-        public static IServiceCollection RegisterInfrastructure(this IServiceCollection services)
+        public static IServiceCollection RegisterInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            services.RegisterDbContext();
+            services.RegisterDbContext(configuration);
             services.RegisterRepositories();
             return services;
         }
-        public static IServiceCollection RegisterDbContext(this IServiceCollection services)
+
+        public static IServiceCollection RegisterDbContext(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<RequirementsContext>(options => 
-                options.UseSqlServer("name=ConnectionStrings:RequirementsDatabase"));
+            services.AddDbContext<RequirementsContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("RequirementsPostgresDatabase")));
+                //options.UseSqlServer("name=ConnectionStrings:RequirementsSQLDatabase"));
             return services;
         }
 

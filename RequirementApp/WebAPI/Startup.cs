@@ -11,19 +11,20 @@ namespace MK.RequirementsApp.WebAPI
 {
     public class Startup
     {
+
+        private IConfiguration configuration { get; }
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            this.configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
 
             services.RegisterApplication();
-            services.RegisterInfrastructure();
+            services.RegisterInfrastructure(configuration);
             services.AddControllers();
 
             services.AddSwaggerGen(c =>
@@ -36,7 +37,7 @@ namespace MK.RequirementsApp.WebAPI
                 options.AddPolicy(name: "AllowBlazor",
                     policy =>
                     {
-                        policy.WithOrigins("https://*:7226")
+                        policy.WithOrigins("https://*:7057")
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                     });
@@ -54,10 +55,8 @@ namespace MK.RequirementsApp.WebAPI
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
-            //app.UseCors("AllowBlazor");
-
+            app.UseCors("AllowBlazor");
             app.UseAuthorization();
 
             app.UseCors(options =>
