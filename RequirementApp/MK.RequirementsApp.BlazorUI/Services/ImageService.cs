@@ -8,7 +8,7 @@ namespace MK.RequirementsApp.BlazorUI.Services
     {
 
         private HttpClient httpClient { get; set; }
-        private List<string> baseUrls = new List<string>() { "https://localhost:5001" /*"https://192.168.0.238:5001", "https://localhost:5001", "https://192.168.0.241:5001"*/ };
+        private List<string> baseUrls = new List<string>() { "http://192.168.0.128:5000" /*"https://192.168.0.238:5001", "https://localhost:5001", "https://192.168.0.241:5001"*/ };
 
         public ImageService(HttpClient httpClient)
         {

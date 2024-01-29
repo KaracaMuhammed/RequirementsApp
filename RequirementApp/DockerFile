@@ -19,11 +19,18 @@ COPY . .
 # Build the solution
 RUN dotnet build -c Release
 
+# Install the Entity Framework Core CLI tools globally
+RUN dotnet tool install --global dotnet-ef --version 7.0.15
+
+# Add the tools directory to the PATH
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
 # Run database migrations
-WORKDIR /src/MK.RequirementsApp.Infrastructure
-RUN rm -rf Migrations  # Remove existing migration folder if it exists
-RUN dotnet ef migrations add InitialMigration -c YourDbContext -o Migrations --project MK.RequirementsApp.Infrastructure
-RUN dotnet ef database update -c YourDbContext --project MK.RequirementsApp.Infrastructure
+# WORKDIR /src/MK.RequirementsApp.Infrastructure
+# RUN rm -rf Migrations  # Remove existing migration folder if it exists
+# RUN dotnet ef migrations add InitialMigration --startup-project ../MK.RequirementsApp.WebAPI/MK.RequirementsApp.WebAPI.csproj
+# RUN dotnet ef database update --startup-project ../MK.RequirementsApp.WebAPI/MK.RequirementsApp.WebAPI.csproj
+
 
 # Publish Stage
 FROM build AS publish
