@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Model\MK.RequirementsApp.Domain.csproj" />
+    <ProjectReference Include="..\MK.RequirementsApp.Domain\MK.RequirementsApp.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -31,17 +31,6 @@ namespace MK.RequirementsApp.WebAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPI", Version = "v1" });
             });
-
-            services.AddCors(options =>
-            {
-                options.AddPolicy(name: "AllowBlazor",
-                    policy =>
-                    {
-                        policy.WithOrigins("https://*:7057")
-                            .AllowAnyHeader()
-                            .AllowAnyMethod();
-                    });
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,15 +45,17 @@ namespace MK.RequirementsApp.WebAPI
 
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseCors("AllowBlazor");
-            app.UseAuthorization();
+
 
             app.UseCors(options =>
             {
                 options.AllowAnyOrigin();
+                // options.WithOrigins("https://localhost:7057");
                 options.AllowAnyHeader();
                 options.AllowAnyMethod();
             });
+
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

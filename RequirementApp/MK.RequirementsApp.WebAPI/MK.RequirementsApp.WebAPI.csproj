@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MK.RequirementsApp.Application\MK.RequirementsApp.Application.csproj" />
+    <ProjectReference Include="..\MK.RequirementsApp.Domain\MK.RequirementsApp.Domain.csproj" />
     <ProjectReference Include="..\MK.RequirementsApp.Infrastructure\MK.RequirementsApp.Infrastructure.csproj" />
   </ItemGroup>
 
