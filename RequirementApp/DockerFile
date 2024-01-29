@@ -8,6 +8,7 @@ COPY MK.RequirementsApp.Application/*.csproj ./MK.RequirementsApp.Application/
 COPY MK.RequirementsApp.Infrastructure/*.csproj ./MK.RequirementsApp.Infrastructure/
 COPY MK.RequirementsApp.Domain/*.csproj ./MK.RequirementsApp.Domain/
 COPY MK.RequirementsApp.WebAPI/*.csproj ./MK.RequirementsApp.WebAPI/
+COPY MK.RequirementsApp.BlazorUI/*.csproj ./MK.RequirementsApp.BlazorUI/
 
 # Restore dependencies
 RUN dotnet restore
