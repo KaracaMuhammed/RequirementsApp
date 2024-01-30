@@ -6,8 +6,8 @@ WORKDIR /src
 COPY *.sln .
 COPY MK.RequirementsApp.Application/*.csproj ./MK.RequirementsApp.Application/
 COPY MK.RequirementsApp.Infrastructure/*.csproj ./MK.RequirementsApp.Infrastructure/
-COPY MK.RequirementsApp.Domain/*.csproj ./MK.RequirementsApp.Domain/
 COPY MK.RequirementsApp.WebAPI/*.csproj ./MK.RequirementsApp.WebAPI/
+COPY MK.RequirementsApp.Domain/*.csproj ./MK.RequirementsApp.Domain/
 COPY MK.RequirementsApp.BlazorUI/*.csproj ./MK.RequirementsApp.BlazorUI/
 
 # Restore dependencies
@@ -18,19 +18,6 @@ COPY . .
 
 # Build the solution
 RUN dotnet build -c Release
-
-# Install the Entity Framework Core CLI tools globally
-RUN dotnet tool install --global dotnet-ef --version 7.0.15
-
-# Add the tools directory to the PATH
-ENV PATH="${PATH}:/root/.dotnet/tools"
-
-# Run database migrations
-# WORKDIR /src/MK.RequirementsApp.Infrastructure
-# RUN rm -rf Migrations  # Remove existing migration folder if it exists
-# RUN dotnet ef migrations add InitialMigration --startup-project ../MK.RequirementsApp.WebAPI/MK.RequirementsApp.WebAPI.csproj
-# RUN dotnet ef database update --startup-project ../MK.RequirementsApp.WebAPI/MK.RequirementsApp.WebAPI.csproj
-
 
 # Publish Stage
 FROM build AS publish

@@ -1,0 +1,32 @@
+# Build Stage for Blazor App
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-blazor
+WORKDIR /src
+
+# Copy only the necessary files for restoring dependencies
+COPY *.sln .
+COPY MK.RequirementsApp.BlazorUI/*.csproj ./MK.RequirementsApp.BlazorUI/
+
+# Restore dependencies
+RUN dotnet restore
+
+# Copy the entire Blazor app
+COPY . .
+
+# Build the Blazor app
+RUN dotnet build -c Release
+
+# Publish Stage for Blazor App
+FROM build-blazor AS publish-blazor
+WORKDIR /src/MK.RequirementsApp.BlazorUI
+RUN dotnet publish -c Release -o /app/publish-blazor
+
+# Final Stage for Blazor App
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS final-blazor
+WORKDIR /app
+COPY --from=publish-blazor /app/publish-blazor .
+
+# Expose the port the Blazor app will run on
+EXPOSE 80
+
+# Command to run the Blazor app
+ENTRYPOINT ["dotnet", "MK.RequirementsApp.BlazorUI.dll"]
