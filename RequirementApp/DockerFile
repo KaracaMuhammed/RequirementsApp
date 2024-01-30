@@ -31,7 +31,6 @@ COPY --from=publish /app/publish .
 
 # Expose the port the app will run on
 EXPOSE 5000
-EXPOSE 5001
 
 # Command to run the application
 ENTRYPOINT ["dotnet", "MK.RequirementsApp.WebAPI.dll"]

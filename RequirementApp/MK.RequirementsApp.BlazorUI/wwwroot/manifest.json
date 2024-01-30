@@ -1,6 +1,6 @@
 {
-  "name": "MK.RequirementsApp.BlazorUI",
-  "short_name": "MK.RequirementsApp.BlazorUI",
+  "name": "EcoHome",
+  "short_name": "EcoHome",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
