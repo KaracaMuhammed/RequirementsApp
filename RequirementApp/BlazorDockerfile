@@ -4,6 +4,10 @@ WORKDIR /src
 
 # Copy only the necessary files for restoring dependencies
 COPY *.sln .
+COPY MK.RequirementsApp.Application/*.csproj ./MK.RequirementsApp.Application/
+COPY MK.RequirementsApp.Infrastructure/*.csproj ./MK.RequirementsApp.Infrastructure/
+COPY MK.RequirementsApp.WebAPI/*.csproj ./MK.RequirementsApp.WebAPI/
+COPY MK.RequirementsApp.Domain/*.csproj ./MK.RequirementsApp.Domain/
 COPY MK.RequirementsApp.BlazorUI/*.csproj ./MK.RequirementsApp.BlazorUI/
 
 # Restore dependencies
@@ -26,7 +30,7 @@ WORKDIR /app
 COPY --from=publish-blazor /app/publish-blazor .
 
 # Expose the port the Blazor app will run on
-EXPOSE 80
+EXPOSE 5216
 
 # Command to run the Blazor app
 ENTRYPOINT ["dotnet", "MK.RequirementsApp.BlazorUI.dll"]

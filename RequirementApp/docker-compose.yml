@@ -36,6 +36,6 @@ services:
   #       context: .
   #       dockerfile: BlazorDockerfile
   #     ports:
-  #       - "8080:80"
+  #       - "5216:5216"
   #     depends_on:
   #       - app
